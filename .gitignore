@@ -1,9 +1,8 @@
 .idea/
 .ipynb_checkpoints/
-*/.DS_Store
 pascal-voc.tgz
-.DS_Store
+*.DS_Store
 __pycache__/
 pascal-voc/
-voc2012_train.h5
-voc2012_val.h5
+*.icloud
+*.h5
