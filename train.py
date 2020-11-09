@@ -38,6 +38,7 @@ def train(model, voc2012, criterion, num_epochs=5, batch_size=64, learning_rate=
 
         print('Epoch:{}, Loss:{:.4f}'.format(epoch+1, float(loss)))
 
+<<<<<<< HEAD
     torch.save(model, "./model/naive" + '.pt')
 
 
@@ -48,3 +49,10 @@ def predict(model, X):
     pred = torch.argmax(pred, dim=0)
     return pred
 
+=======
+    # torch.save(model, "./model/naive" + '.pt')
+
+
+def predict(model, image, label):
+    pass
+>>>>>>> 9a4daf7da4055129cd01d8382adecf3953edf715
