@@ -6,3 +6,4 @@ __pycache__/
 pascal-voc/
 *.icloud
 *.h5
+*.pt

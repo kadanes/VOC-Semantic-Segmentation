@@ -12,11 +12,14 @@ class Naive(nn.Module):
 
         self.encoder = nn.Sequential(
             nn.Conv2d(3, 64, 3, stride=2, padding=1),
-            nn.ReLU(),
+            # nn.LeakyReLU(),
+            nn.Tanh(),
             nn.Conv2d(64, 128, 3, stride=2, padding=1),
-            nn.ReLU(),
+            # nn.LeakyReLU(),
+            nn.Tanh(),
             nn.Conv2d(128, 256, 3, stride=2, padding=1),
-            nn.ReLU(),
+            # nn.LeakyReLU(),
+            nn.Tanh(),
             nn.Conv2d(256, 512, 3, stride=2, padding=1),
         )
 
@@ -30,11 +33,14 @@ class Naive(nn.Module):
 
         self.decorder = nn.Sequential(
             nn.ConvTranspose2d(512, 256, 3, stride=2, padding=1, output_padding=1),
-            nn.ReLU(),
+            # nn.LeakyReLU(),
+            nn.Tanh(),
             nn.ConvTranspose2d(256, 128, 3, stride=2, padding=1, output_padding=1),
-            nn.ReLU(),
+            # nn.LeakyReLU(),
+            nn.Tanh(),
             nn.ConvTranspose2d(128, 64, 3, stride=2, padding=1, output_padding=1),
-            nn.ReLU(),
+            # nn.LeakyReLU(),
+            nn.Tanh(),
             nn.ConvTranspose2d(64, 21, 3, stride=2, padding=1, output_padding=1),
         )
 

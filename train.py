@@ -40,11 +40,13 @@ def train(model, voc2012, criterion, num_epochs=5, batch_size=64, learning_rate=
 
     torch.save(model, "./model/naive" + '.pt')
 
-
 # X: N, C, H, W
 def predict(model, X):
     X = torch.FloatTensor(X).permute(0, 3, 1, 2)
+
+    if torch.cuda.is_available():
+      X = X.cuda()
+
     pred = model(X)
-    pred = torch.argmax(pred, dim=0)
     return pred
 
