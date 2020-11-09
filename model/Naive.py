@@ -12,14 +12,11 @@ class Naive(nn.Module):
 
         self.encoder = nn.Sequential(
             nn.Conv2d(3, 64, 3, stride=2, padding=1),
-            # nn.LeakyReLU(),
-            nn.Tanh(),
+            nn.LeakyReLU(),
             nn.Conv2d(64, 128, 3, stride=2, padding=1),
-            # nn.LeakyReLU(),
-            nn.Tanh(),
+            nn.LeakyReLU(),
             nn.Conv2d(128, 256, 3, stride=2, padding=1),
-            # nn.LeakyReLU(),
-            nn.Tanh(),
+            nn.LeakyReLU(),
             nn.Conv2d(256, 512, 3, stride=2, padding=1),
         )
 
@@ -33,27 +30,18 @@ class Naive(nn.Module):
 
         self.decorder = nn.Sequential(
             nn.ConvTranspose2d(512, 256, 3, stride=2, padding=1, output_padding=1),
-            # nn.LeakyReLU(),
-            nn.Tanh(),
+            nn.LeakyReLU(),
             nn.ConvTranspose2d(256, 128, 3, stride=2, padding=1, output_padding=1),
-            # nn.LeakyReLU(),
-            nn.Tanh(),
+            nn.LeakyReLU(),
             nn.ConvTranspose2d(128, 64, 3, stride=2, padding=1, output_padding=1),
-            # nn.LeakyReLU(),
-            nn.Tanh(),
+            nn.LeakyReLU(),
             nn.ConvTranspose2d(64, 21, 3, stride=2, padding=1, output_padding=1),
         )
 
+    # ReLU and Tanh cause output to be all 0
 
     def forward(self, x):
         encoded = self.encoder(x)
-
-        # print("X: ", x.shape)
-        # x = self.relu1(self.conv1(x))
-        # x = self.relu2(self.conv2(x))
-        # x = self.relu3(self.conv3(x))
-        # encoded = self.conv4(x)
-
         decoded = self.decorder(encoded)
         return decoded
 

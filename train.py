@@ -2,11 +2,19 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
+from criterion.CrossEntropy import getCrossEntropyLoss
 
-def train(model, voc2012, criterion, num_epochs=5, batch_size=64, learning_rate=1e-3, weight_decay=1e-5):
+def train(model, voc2012, model_name, criterionType="ce", weighted=False, ignore=False, num_epochs=5, batch_size=64, learning_rate=1e-3, weight_decay=1e-5):
+
+    train_labels = voc2012.train_labels
+
+
     optimizer = torch.optim.Adam(model.parameters(),
                                  lr=learning_rate,
                                  weight_decay=weight_decay)
+
+    if criterionType == "ce":
+        criterion = getCrossEntropyLoss(train_labels, weighted, ignore)
 
     cuda_avail = torch.cuda.is_available()
     if cuda_avail:
@@ -38,7 +46,15 @@ def train(model, voc2012, criterion, num_epochs=5, batch_size=64, learning_rate=
 
         print('Epoch:{}, Loss:{:.4f}'.format(epoch+1, float(loss)))
 
-    torch.save(model, "./model/naive" + '.pt')
+
+    model_name = model_name + "_" + criterionType
+    if criterionType == "ce":
+        if weighted:
+            model_name += "_weighted"
+        if ignore:
+            model_name += "_ignore"
+
+    torch.save(model, "./model/" + model_name + '.pt')
 
 # X: N, C, H, W
 def predict(model, X):
