@@ -162,14 +162,20 @@ def save_model(model, model_name, optimizer, epoch, save_epoch=False):
         torch.save(checkpoint, "./model/checkpoint/" + model_name + "_e" + str(epoch+1) + '.pt')
 
 
-def load_model():
+def load_model(name):
     naive = Naive()
     optimizer = torch.optim.Adam(naive.parameters(), lr=1e-3, weight_decay=1e-5)
-    # if torch.cuda.is_available():
-    checkpoint = torch.load("./model/naive_ce_weighted.pt")
-    start_epoch = checkpoint['epoch']
-    naive.load_state_dict(checkpoint['state_dict'])
-    optimizer.load_state_dict(checkpoint['optimizer'])
+
+    if torch.cuda.is_available():
+        checkpoint = torch.load("./model/" + name)
+        start_epoch = checkpoint['epoch']
+        naive.load_state_dict(checkpoint['state_dict'])
+        optimizer.load_state_dict(checkpoint['optimizer'])
+    else:
+        checkpoint = torch.load("./model/" + name, map_location=torch.device('cpu'))
+        start_epoch = checkpoint['epoch']
+        naive.load_state_dict(checkpoint['state_dict'])
+        optimizer.load_state_dict(checkpoint['optimizer'])
 
     return naive, optimizer, start_epoch
 
