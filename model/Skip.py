@@ -84,7 +84,7 @@ class Skip(nn.Module):
         up2 = self.up2(up3 + down2)
 
         # print("Up 2: ", up2.shape)
-
+        # up1 = self.up1(up2 + down1) # might help
         up1 = self.up1(up2)
 
         # print("Up 1: ", up1.shape)
