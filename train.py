@@ -9,7 +9,7 @@ import numpy as np
 def train(model, voc2012, model_name, optimizer=None, start_epoch=0, criterionType="ce", weighted=False, ignore=False, num_epochs=5, batch_size=64, learning_rate=1e-3, weight_decay=1e-5):
 
     train_labels = voc2012.train_labels
-    eval_frequency = 10
+    eval_frequency = 1
 
     if optimizer is None:
         optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
@@ -100,6 +100,7 @@ def evaluate(model, voc2012, criterion, split="Val", batch_size=64, verbose=Fals
     loss = 0
     correct = 0
     n_examples = 0
+    n_images = 0
     # if split == 'val':
     #     loader = val_loader
     # elif split == 'test':
@@ -122,17 +123,23 @@ def evaluate(model, voc2012, criterion, split="Val", batch_size=64, verbose=Fals
 
         if torch.cuda.is_available():
             # print(i, " unique: ", np.unique(preds[i].cpu().detach()))
-            pred = output.cpu().detach().numpy().argmax(0)
+            pred = output.cpu().detach().numpy().argmax(1)
             batch_eval_labels = batch_eval_labels.cpu().detach().numpy()
             # print(i, "after argmax unique: ", np.unique(pred))
         else:
             # print(i, " unique: ", np.unique(preds[i].detach()))
-            pred = output.detach().numpy().argmax(0)
+            pred = output.detach().numpy().argmax(1)
             batch_eval_labels = batch_eval_labels.detach().numpy()
             # print(i, "after argmax unique: ", np.unique(pred))
 
+            # print("Output:\n", output, "\nShape: ", output.shape)
+            # print("Pred:\n", pred, "\nShape: ", pred.shape)
+            # print("Eval Labels:\n", batch_eval_labels, "\nShape: ", batch_eval_labels.shape)
+            # print("Equal:\n", pred == batch_eval_labels, "\nShape: ", (pred == batch_eval_labels).shape)
+
         correct += np.sum(pred == batch_eval_labels)
-        n_examples += batch_eval_images.shape[0]
+        n_examples += np.prod(batch_eval_labels.shape)
+        n_images += batch_eval_images.shape[0]
 
         if itr == n_iter:
             break
@@ -141,7 +148,11 @@ def evaluate(model, voc2012, criterion, split="Val", batch_size=64, verbose=Fals
     loss /= n_examples
     acc = 100. * correct / n_examples
 
-    eval_log = '{} set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)'.format(split, loss, correct, n_examples, acc)
+    # eval_log = '{} set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%), Images: {}'.format(split, loss, correct/n_images, n_examples//n_images, acc, n_images)
+    eval_log = '{} set: Average loss: {:.4f}, Accuracy: {:.0f}/{} ({:.0f}%)'.format(split, loss, correct/n_images, n_examples//n_images, acc)
+
+
+    # print(eval_log)
 
     # if verbose:print('\n{} set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
     #         split, loss, correct, n_examples, acc))
