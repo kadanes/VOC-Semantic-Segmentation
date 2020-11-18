@@ -4,6 +4,11 @@ import torch.nn.functional as F
 import torch.optim as optim
 from criterion.CrossEntropy import getCrossEntropyLoss
 from model.Naive import Naive
+from model.Skip import Skip
+from model.FCN import FCN
+
+from utils.visualization import visualizePrediction
+
 import numpy as np
 
 def train(model, voc2012, model_name, optimizer=None, start_epoch=0, criterionType="ce", weighted=False, ignore=False, num_epochs=5, batch_size=64, learning_rate=1e-3, weight_decay=1e-5):
@@ -174,20 +179,41 @@ def save_model(model, model_name, optimizer, epoch, save_epoch=False):
 
 
 def load_model(name):
-    naive = Naive()
-    optimizer = torch.optim.Adam(naive.parameters(), lr=1e-3, weight_decay=1e-5)
+
+    if "naive" in name:
+        model = Naive()
+    if "skip" in name:
+        model = Skip()
+    if "fcn" in name:
+        model = FCN()
+
+    optimizer = torch.optim.Adam(model.parameters(), lr=1e-3, weight_decay=1e-5)
 
     if torch.cuda.is_available():
         checkpoint = torch.load("./model/" + name)
         start_epoch = checkpoint['epoch']
-        naive.load_state_dict(checkpoint['state_dict'])
+        model.load_state_dict(checkpoint['state_dict'])
         optimizer.load_state_dict(checkpoint['optimizer'])
     else:
         checkpoint = torch.load("./model/" + name, map_location=torch.device('cpu'))
         start_epoch = checkpoint['epoch']
-        naive.load_state_dict(checkpoint['state_dict'])
+        model.load_state_dict(checkpoint['state_dict'])
         optimizer.load_state_dict(checkpoint['optimizer'])
 
-    return naive, optimizer, start_epoch
+    return model, optimizer, start_epoch
 
-
+def compare_model_performance(name):
+    print("Name:", name)
+    cuda_avail = torch.cuda.is_available()
+    if cuda_avail:
+        torch.cuda.manual_seed(0)
+        model.cuda()
+    else:
+        torch.manual_seed(0)
+    model,_ ,_ = load_model(name)
+    
+#     for param in model.parameters():
+#         print(param.data)
+    ind = 0
+    visualizePrediction(model, voc2012.train_images[ind], voc2012.train_labels[ind])
+    visualizePrediction(model, voc2012.val_images[ind], voc2012.val_labels[ind])

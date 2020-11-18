@@ -113,3 +113,5 @@ Weight Decay: 1e-05
 Batch Size: 1
 Epochs: 12
 -----------------------
+Epoch:1, Loss:3.0848 Val set: Average loss: 0.0000, Accuracy: 889/50176 (2%)
+Epoch:2, Loss:3.0600 Val set: Average loss: 0.0000, Accuracy: 7140/50176 (14%)
