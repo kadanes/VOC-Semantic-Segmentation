@@ -33,27 +33,30 @@ class Naive(nn.Module):
         self.decorder = nn.Sequential(
             nn.ConvTranspose2d(512, 256, 3, stride=2, padding=1, output_padding=1),
             nn.LeakyReLU(),
+            nn.Dropout2d(),
             nn.ConvTranspose2d(256, 128, 3, stride=2, padding=1, output_padding=1),
             nn.LeakyReLU(),
+            nn.Dropout2d(),
             nn.ConvTranspose2d(128, 64, 3, stride=2, padding=1, output_padding=1),
             nn.LeakyReLU(),
+            nn.Dropout2d(),
             nn.ConvTranspose2d(64, 21, 3, stride=2, padding=1, output_padding=1),
         )
 
     # ReLU and Tanh cause output to be all 0
 
     def forward(self, x):
-        transpose = nn.ConvTranspose2d(512, 256, 3, stride=2, padding=1, output_padding=1),
+        # transpose = nn.ConvTranspose2d(512, 256, 3, stride=2, padding=1, output_padding=1),
 
         encoded = self.encoder(x)
 
-        pool = nn.Sequential(
-            nn.Conv2d(3, 64, 3, stride=2, padding=1),
-            nn.LeakyReLU(),
-            nn.MaxPool2d(2)
-        )
+        # pool = nn.Sequential(
+        #     nn.Conv2d(3, 64, 3, stride=2, padding=1),
+        #     nn.LeakyReLU(),
+        #     nn.MaxPool2d(2)
+        # )
 
-        print("Pool:", pool(x).shape)
+        # print("Pool:", pool(x).shape)
 
 
         decoded = self.decorder(encoded)
