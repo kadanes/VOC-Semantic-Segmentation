@@ -45,10 +45,10 @@ def train(model_name, optimizer=None, start_epoch=0, criterionType="ce", weighte
     pdata = pathlib.Path('./pascal-voc/VOC2012/')
 
     if ptrain.is_file() and pval.is_file():
-        print("File exists")
         voc2012.load_all_data()
+        print("~~~~~~~~~~~~~~~")
+
     else:
-        print("File does not exist")
         if pdata.is_file():
             voc2012.read_all_data_and_save()
         else: 
