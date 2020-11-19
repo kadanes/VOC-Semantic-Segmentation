@@ -18,7 +18,7 @@ class FCN(nn.Module):
 
         self.pool3 = vgg16[:17]
         self.pool4 = vgg16[:24]
-        self.pool5 = vgg16
+        self.pool5 = vgg16[24:]
 
         # print("Pool 3: ", vgg16[:17])
         # print("Pool 4: ", vgg16[:24])
@@ -73,7 +73,7 @@ class FCN(nn.Module):
     def forward(self, x):
         
         pool4 = self.pool4(x)
-        pool5 = self.pool5(x)
+        pool5 = self.pool5(pool4)
 
         # print("Pool 4:", pool4.shape)
         # print("Pool 5:", pool5.shape)

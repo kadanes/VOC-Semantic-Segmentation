@@ -84,7 +84,7 @@ def visualizePrediction(model, images, labels, heatmap=False):
     plt.show()
 
 
-def compare_model_performance(name):
+def compare_model_performance(name, voc2012):
     print("Name:", name)
     cuda_avail = torch.cuda.is_available()
     if cuda_avail:
