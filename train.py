@@ -150,7 +150,7 @@ def evaluate(model, voc2012, criterion, split="Val", batch_size=64, verbose=Fals
             break
         itr += 1
 
-    loss /= n_examples
+    loss /= n_images
     acc = 100. * correct / n_examples
 
     # eval_log = '{} set: Average loss: {:.4f}, Accuracy: {}/{} ({:.0f}%), Images: {}'.format(split, loss, correct/n_images, n_examples//n_images, acc, n_images)

@@ -89,14 +89,13 @@ def compare_model_performance(name, voc2012):
     cuda_avail = torch.cuda.is_available()
     if cuda_avail:
         torch.cuda.manual_seed(0)
-        model.cuda()
     else:
         torch.manual_seed(0)
     model,_ ,_ = load_model(name)
     
 #     for param in model.parameters():
 #         print(param.data)
-    ind = 0
+    ind = range(0, 5)
     visualizePrediction(model, voc2012.train_images[ind], voc2012.train_labels[ind])
     visualizePrediction(model, voc2012.val_images[ind], voc2012.val_labels[ind])
 
