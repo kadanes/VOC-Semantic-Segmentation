@@ -1,6 +1,7 @@
 import pathlib
 import matplotlib.pyplot as plt
 import subprocess
+
 import time
 
 import torch
@@ -51,18 +52,18 @@ def train(model_name, optimizer=None, start_epoch=0, criterionType="ce", weighte
         if pdata.is_file():
             voc2012.read_all_data_and_save()
         else: 
-            print("Downloading VOC2012 Data...")
-            subprocess.run([
-                "wget https://s3.amazonaws.com/fast-ai-imagelocal/pascal-voc.tgz", 
-                "tar -xzf ./pascal-voc.tgz",
-                "rm -rf ./pascal-voc/VOC2007",
-                "rm ./pascal-voc.tgz"
-                ])
+            print("Downloading VOC2012 dataset...")
+            print(subprocess.run(['wget', 'https://s3.amazonaws.com/fast-ai-imagelocal/pascal-voc.tgz'], stdout=subprocess.PIPE))
+            print("Unzipping VOC2012 dataset...")
+            print(subprocess.run(["/bin/tar", "-xzf", "./pascal-voc.tgz"], stdout=subprocess.PIPE))
+            print("Removing old data...")
+            print(subprocess.run(["rm", "-rf", "./pascal-voc/VOC2007"], stdout=subprocess.PIPE))
+            print(subprocess.run(["rm", "./pascal-voc.tgz"], stdout=subprocess.PIPE))
+            print("Reading dataset in...")
             voc2012.read_all_data_and_save()
-            print("Removing downloaded VOC2012 data to save space...")
-            subprocess.run([
-                "rm -rf ./pascal-voc/",
-                ])
+            print("Cleaning up VOC2012 download...")
+            print(subprocess.run(["rm", "-rf", "./pascal-voc/"], stdout=subprocess.PIPE))
+            print("~~~~~~~~~~~~~~~")
 
     train_labels = voc2012.train_labels
     eval_frequency = 1
@@ -124,8 +125,6 @@ def train(model_name, optimizer=None, start_epoch=0, criterionType="ce", weighte
             loss = criterion(segments, batch_train_labels)
             loss.backward()
             optimizer.step()
-
-            break
 
         if (epoch + 1) % 30 == 0:
             # torch.save(model, "./model/checkpoint/" + model_name + "_e" + str(epoch+1) + '.pt')
