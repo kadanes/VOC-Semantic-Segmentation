@@ -2,7 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import torch
 
-from train import predict
+from train import predict, load_model
 
 color_dict = range(100, 1000, 25)
 color_dict = [*color_dict][:21]
@@ -82,3 +82,23 @@ def visualizePrediction(model, images, labels, heatmap=False):
         ind = 1
 
     plt.show()
+
+
+def compare_model_performance(name):
+    print("Name:", name)
+    cuda_avail = torch.cuda.is_available()
+    if cuda_avail:
+        torch.cuda.manual_seed(0)
+        model.cuda()
+    else:
+        torch.manual_seed(0)
+    model,_ ,_ = load_model(name)
+    
+#     for param in model.parameters():
+#         print(param.data)
+    ind = 0
+    visualizePrediction(model, voc2012.train_images[ind], voc2012.train_labels[ind])
+    visualizePrediction(model, voc2012.val_images[ind], voc2012.val_labels[ind])
+
+
+

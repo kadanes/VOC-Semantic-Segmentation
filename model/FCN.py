@@ -7,15 +7,28 @@ class FCN(nn.Module):
 
     def __init__(self):
         super(FCN, self).__init__()
-        self.vgg16 = models.vgg16(pretrained=True).features
+        vgg16 = models.vgg16(pretrained=True).features
         # print(self.vgg16)
+
+        input = torch.autograd.Variable(torch.randn(1, 3, 224, 224))
+
+        # print("Model: ", self.vgg16)
+
+        # For skip connections
+
+        self.pool3 = vgg16[:17]
+        self.pool4 = vgg16[:24]
+        self.pool5 = vgg16
+
+        # print("Pool 3: ", vgg16[:17])
+        # print("Pool 4: ", vgg16[:24])
         
-        self.flattent = nn.Sequential(
-            # nn.Conv2d(512, 4096, 7),
-            # nn.Conv2d(4096, 4096, 1),
+        self.upconv4 = nn.Sequential(
+            nn.ConvTranspose2d(512, 512, 3, stride=2, padding=1, output_padding=1),
+            nn.LeakyReLU(),
+            nn.Dropout2d(),
         )
 
-        # self.classes = nn.Conv2d(4096, 21, 1)
 
         self.upconv = nn.Sequential(
             # nn.ConvTranspose2d(21, 21, 3, stride=2, padding=1, output_padding=1),
@@ -38,15 +51,16 @@ class FCN(nn.Module):
             nn.ConvTranspose2d(64, 32, 3, stride=2, padding=1, output_padding=1),
             nn.LeakyReLU(),
             nn.Dropout2d(),
-            nn.ConvTranspose2d(32, 21, 3, stride=2, padding=1, output_padding=1),
+            # nn.ConvTranspose2d(32, 21, 3, stride=2, padding=1, output_padding=1),
+            nn.Conv2d(32, 21, 1)
         )
 
-        self.fcn16 = nn.Sequential(
-            self.vgg16,
-            # self.flattent,
-            # self.classes,
-            self.upconv
-        )
+        # self.fcn16 = nn.Sequential(
+        #     self.vgg16,
+        #     # self.flattent,
+        #     # self.classes,
+        #     self.upconv
+        # )
         
 
         # input = torch.autograd.Variable(torch.randn(1, 3, 224, 224))
@@ -57,9 +71,20 @@ class FCN(nn.Module):
         # print(self.fcn16)
 
     def forward(self, x):
-        return self.fcn16(x)
+        
+        pool4 = self.pool4(x)
+        pool5 = self.pool5(x)
+
+        # print("Pool 4:", pool4.shape)
+        # print("Pool 5:", pool5.shape)
+
+        # print("Up Conv: ", self.upconv4(pool5).shape)
+        up4 = self.upconv4(pool5) + pool4
+
+        return self.upconv(up4)
 
 
 if __name__ == "__main__":
     fcn = FCN()
-    
+    x = torch.autograd.Variable(torch.randn(1, 3, 224, 224))   
+    print(fcn.forward(x).shape)

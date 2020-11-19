@@ -7,7 +7,7 @@ from model.Naive import Naive
 from model.Skip import Skip
 from model.FCN import FCN
 
-from utils.visualization import visualizePrediction
+# from utils.visualization import visualizePrediction
 
 import numpy as np
 
@@ -201,19 +201,3 @@ def load_model(name):
         optimizer.load_state_dict(checkpoint['optimizer'])
 
     return model, optimizer, start_epoch
-
-def compare_model_performance(name):
-    print("Name:", name)
-    cuda_avail = torch.cuda.is_available()
-    if cuda_avail:
-        torch.cuda.manual_seed(0)
-        model.cuda()
-    else:
-        torch.manual_seed(0)
-    model,_ ,_ = load_model(name)
-    
-#     for param in model.parameters():
-#         print(param.data)
-    ind = 0
-    visualizePrediction(model, voc2012.train_images[ind], voc2012.train_labels[ind])
-    visualizePrediction(model, voc2012.val_images[ind], voc2012.val_labels[ind])
