@@ -1,17 +1,68 @@
+import pathlib
+import matplotlib.pyplot as plt
+import subprocess
+import time
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 from criterion.CrossEntropy import getCrossEntropyLoss
+
 from model.Naive import Naive
 from model.Skip import Skip
 from model.FCN import FCN
+from model.FCN8 import FCN8
+
+from voc12 import VOC2012
 
 # from utils.visualization import visualizePrediction
 
 import numpy as np
 
-def train(model, voc2012, model_name, optimizer=None, start_epoch=0, criterionType="ce", weighted=False, ignore=False, num_epochs=5, batch_size=64, learning_rate=1e-3, weight_decay=1e-5):
+def train(model_name, optimizer=None, start_epoch=0, criterionType="ce", weighted=False, ignore=False, num_epochs=5, batch_size=64, learning_rate=1e-3, weight_decay=1e-5):
+
+    model = None 
+
+    if model_name == "naive":
+        model = Naive()
+    elif model_name == "skip":
+        model = Skip()
+    elif model_name == "fcn":
+        model = FCN()
+    elif model_name == "fcn8":
+        model = FCN8()
+    else:
+        raise Exception("Please pass a supported model name: [naive, skip, fcn, fcn8]")
+    print("Model Architecture to be Trained: ")
+    print(model)
+    print("~~~~~~~~~~~~~~~")
+
+    voc2012 = VOC2012('./pascal-voc/VOC2012/')
+    ptrain = pathlib.Path('./voc2012_train.h5')
+    pval = pathlib.Path('./voc2012_val.h5')
+    pdata = pathlib.Path('./pascal-voc/VOC2012/')
+
+    if ptrain.is_file() and pval.is_file():
+        print("File exists")
+        voc2012.load_all_data()
+    else:
+        print("File does not exist")
+        if pdata.is_file():
+            voc2012.read_all_data_and_save()
+        else: 
+            print("Downloading VOC2012 Data...")
+            subprocess.run([
+                "wget https://s3.amazonaws.com/fast-ai-imagelocal/pascal-voc.tgz", 
+                "tar -xzf ./pascal-voc.tgz",
+                "rm -rf ./pascal-voc/VOC2007",
+                "rm ./pascal-voc.tgz"
+                ])
+            voc2012.read_all_data_and_save()
+            print("Removing downloaded VOC2012 data to save space...")
+            subprocess.run([
+                "rm -rf ./pascal-voc/",
+                ])
 
     train_labels = voc2012.train_labels
     eval_frequency = 1
@@ -50,9 +101,12 @@ def train(model, voc2012, model_name, optimizer=None, start_epoch=0, criterionTy
     log.write("Epochs: " + str(num_epochs) + "\n")
     log.write("-----------------------\n")
     log.close()
+    
+    print("Started training model...")
+
+    start = time.time()
 
     model.train()
-
     for epoch in range(start_epoch, num_epochs):
         for start in range(0, len(voc2012.train_images), batch_size):
 
@@ -71,6 +125,8 @@ def train(model, voc2012, model_name, optimizer=None, start_epoch=0, criterionTy
             loss.backward()
             optimizer.step()
 
+            break
+
         if (epoch + 1) % 30 == 0:
             # torch.save(model, "./model/checkpoint/" + model_name + "_e" + str(epoch+1) + '.pt')
             save_model(model, model_name, optimizer, epoch, save_epoch=True)
@@ -85,8 +141,18 @@ def train(model, voc2012, model_name, optimizer=None, start_epoch=0, criterionTy
         log.close()
         print(loss_status)
 
+    end = time.time()
+    hours, rem = divmod(end-start, 3600)
+    minutes, seconds = divmod(rem, 60)
+    training_time = "{:0>2}:{:0>2}:{:05.2f}".format(int(hours),int(minutes),seconds)
+    print("Training time: ", training_time)
+
+    log = open("./model/" + model_name + ".log", "a+")
+    log.write("Training time: " + str(training_time))
+    log.close()
     # torch.save(model, "./model/" + model_name + '.pt')
     save_model(model, model_name, optimizer, num_epochs)
+    return model
 
 # X: N, C, H, W
 def predict(model, X):
@@ -166,20 +232,21 @@ def evaluate(model, voc2012, criterion, split="Val", batch_size=64, verbose=Fals
 
 
 def save_model(model, model_name, optimizer, epoch, save_epoch=False):
-    checkpoint = {
-        'epoch': epoch + 1,
-        'state_dict': model.state_dict(),
-        'optimizer': optimizer.state_dict()
-    }
+    # checkpoint = {
+    #     'epoch': epoch + 1,
+    #     'state_dict': model.state_dict(),
+    #     'optimizer': optimizer.state_dict()
+    # }
+    # checkpoint = model
 
     if not save_epoch:
-        torch.save(checkpoint, "./model/" + model_name + '.pt')
+        torch.save(model, "./model/" + model_name + '.pt')
     else:
-        torch.save(checkpoint, "./model/checkpoint/" + model_name + "_e" + str(epoch+1) + '.pt')
+        torch.save(model, "./model/checkpoint/" + model_name + "_e" + str(epoch+1) + '.pt')
 
 
 def load_model(name):
-
+    model = None
     if "naive" in name:
         model = Naive()
     if "skip" in name:
@@ -188,16 +255,32 @@ def load_model(name):
         model = FCN()
 
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-3, weight_decay=1e-5)
+    start_epoch = 0
 
     if torch.cuda.is_available():
-        checkpoint = torch.load("./model/" + name)
-        start_epoch = checkpoint['epoch']
-        model.load_state_dict(checkpoint['state_dict'])
-        optimizer.load_state_dict(checkpoint['optimizer'])
+        try:
+            checkpoint = torch.load("./model/" + name)
+            start_epoch = checkpoint['epoch']
+            model.load_state_dict(checkpoint['state_dict'])
+            optimizer.load_state_dict(checkpoint['optimizer'])
+        except KeyError:
+            print("Checkpoint incorrectly formatted")
+        except TypeError:
+            model = torch.load("./model/" + name)
+        except FileNotFoundError:
+            print("Model does not exist")
+
     else:
-        checkpoint = torch.load("./model/" + name, map_location=torch.device('cpu'))
-        start_epoch = checkpoint['epoch']
-        model.load_state_dict(checkpoint['state_dict'])
-        optimizer.load_state_dict(checkpoint['optimizer'])
+        try:
+            checkpoint = torch.load("./model/" + name, map_location=torch.device('cpu'))
+            start_epoch = checkpoint['epoch']
+            model.load_state_dict(checkpoint['state_dict'])
+            optimizer.load_state_dict(checkpoint['optimizer'])
+        except KeyError:
+            print("Checkpoint incorrectly formatted")
+        except TypeError:
+            model = torch.load("./model/" + name,  map_location=torch.device('cpu')) 
+        except FileNotFoundError:
+            print("Model does not exist")
 
     return model, optimizer, start_epoch

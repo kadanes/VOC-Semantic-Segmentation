@@ -23,81 +23,90 @@ def labelVisualize(img):
     return img_out
 
 def visualizePrediction(model, images, labels, heatmap=False):
+    try: 
+        if (len(images.shape) == 3 and len(labels.shape) == 2):
+            images = np.expand_dims(images, axis=0)
+            labels = np.expand_dims(labels, axis=0)
 
-    if (len(images.shape) == 3 and len(labels.shape) == 2):
-        images = np.expand_dims(images, axis=0)
-        labels = np.expand_dims(labels, axis=0)
-
-    image_count = len(images)
+        image_count = len(images)
 
 
-    # fig = plt.figure(figsize=(20, 20))
+        # fig = plt.figure(figsize=(20, 20))
 
-    preds = predict(model, images)
+        preds = predict(model, images)
 
-    ind = 1
-    for i in range(image_count):
-        plt.subplots(1, 3, figsize=(15, 15))  # specifying the overall grid size
-
-        plt.subplot(1, 3, ind)
-        # plt.imshow(images[i])
-
-        # fig.add_subplot(image_count, 3, ind)
-        plt.imshow(images[i])
-
-        ind += 1
-
-        # print("Label: ", labels[i])
-        # print("Label Unique: ", np.unique(labels[i]))
-
-        plt.subplot(1, 3, ind)
-        # fig.add_subplot(image_count, 3, ind)
-
-        if heatmap:
-            plt.imshow(labels[i], cmap='hot')
-        else:
-            plt.imshow(labelVisualize(labels[i]))
-
-        ind += 1
-
-        if torch.cuda.is_available():
-            # print(i, " unique: ", np.unique(preds[i].cpu().detach()))
-            pred = preds[i].cpu().detach().numpy().argmax(0)
-            # print(i, "after argmax unique: ", np.unique(pred))
-        else:
-            # print(i, " unique: ", np.unique(preds[i].detach()))
-            pred = preds[i].detach().numpy().argmax(0)
-            # print(i, "after argmax unique: ", np.unique(pred))
-
-        # print("Pred: ", pred)
-        # print("Label Unique Pred: ", np.unique(pred))
-        plt.subplot(1, 3, ind)
-        # fig.add_subplot(image_count, 3, ind)
-
-        # plt.imshow(pred, cmap='hot')
-        if heatmap:
-            plt.imshow(pred, cmap='hot')
-        else:
-            plt.imshow(labelVisualize(pred))
         ind = 1
+        for i in range(image_count):
+            plt.subplots(1, 3, figsize=(15, 15))  # specifying the overall grid size
 
-    plt.show()
+            plt.subplot(1, 3, ind)
+            # plt.imshow(images[i])
+
+            # fig.add_subplot(image_count, 3, ind)
+            plt.imshow(images[i])
+
+            ind += 1
+
+            # print("Label: ", labels[i])
+            # print("Label Unique: ", np.unique(labels[i]))
+
+            plt.subplot(1, 3, ind)
+            # fig.add_subplot(image_count, 3, ind)
+
+            if heatmap:
+                plt.imshow(labels[i], cmap='hot')
+            else:
+                plt.imshow(labelVisualize(labels[i]))
+
+            ind += 1
+
+            if torch.cuda.is_available():
+                # print(i, " unique: ", np.unique(preds[i].cpu().detach()))
+                pred = preds[i].cpu().detach().numpy().argmax(0)
+                # print(i, "after argmax unique: ", np.unique(pred))
+            else:
+                # print(i, " unique: ", np.unique(preds[i].detach()))
+                pred = preds[i].detach().numpy().argmax(0)
+                # print(i, "after argmax unique: ", np.unique(pred))
+
+            # print("Pred: ", pred)
+            # print("Label Unique Pred: ", np.unique(pred))
+            plt.subplot(1, 3, ind)
+            # fig.add_subplot(image_count, 3, ind)
+
+            # plt.imshow(pred, cmap='hot')
+            if heatmap:
+                plt.imshow(pred, cmap='hot')
+            else:
+                plt.imshow(labelVisualize(pred))
+            ind = 1
+
+        plt.show()
+    except Exception as e:
+        print(e)
 
 
 def compare_model_performance(name, voc2012):
-    print("Name:", name)
-    cuda_avail = torch.cuda.is_available()
-    if cuda_avail:
-        torch.cuda.manual_seed(0)
-    else:
-        torch.manual_seed(0)
-    model,_ ,_ = load_model(name)
     
-#     for param in model.parameters():
-#         print(param.data)
-    ind = range(0, 5)
-    visualizePrediction(model, voc2012.train_images[ind], voc2012.train_labels[ind])
-    visualizePrediction(model, voc2012.val_images[ind], voc2012.val_labels[ind])
+    try: 
+        print("Name:", name)
+
+
+        cuda_avail = torch.cuda.is_available()
+        if cuda_avail:
+            torch.cuda.manual_seed(0)
+        else:
+            torch.manual_seed(0)
+        model,_ ,_ = load_model(name)
+        
+    #     for param in model.parameters():
+    #         print(param.data)
+        ind = range(0, 5)
+        visualizePrediction(model, voc2012.train_images[ind], voc2012.train_labels[ind])
+        visualizePrediction(model, voc2012.val_images[ind], voc2012.val_labels[ind])
+    
+    except Exception as e:
+        print(e)
 
 
 
