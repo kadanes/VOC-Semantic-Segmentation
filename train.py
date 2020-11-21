@@ -9,6 +9,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 from criterion.CrossEntropy import getCrossEntropyLoss
+from criterion.DiceCrossEntropy import getDiceCrossEntropyLoss
 
 from model.Naive import Naive
 from model.Skip import Skip
@@ -21,7 +22,7 @@ from voc12 import VOC2012
 
 import numpy as np
 
-def train(model_name, optimizer=None, start_epoch=0, criterionType="ce", weighted=False, ignore=False, num_epochs=5, batch_size=64, learning_rate=1e-3, weight_decay=1e-5):
+def train(model_name, optimizer=None, start_epoch=0, criterionType="dice", weighted=False, ignore=False, num_epochs=5, batch_size=64, learning_rate=1e-3, weight_decay=1e-5):
 
     model = None 
 
@@ -70,9 +71,20 @@ def train(model_name, optimizer=None, start_epoch=0, criterionType="ce", weighte
 
     if optimizer is None:
         optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
-
+    print("here")
+    print(criterionType)
+    '''
     if criterionType == "ce":
         criterion = getCrossEntropyLoss(train_labels, weighted, ignore)
+    elif criterionType == "dice":
+        print("criterion: dice")
+        criterion = getDiceCrossEntropyLoss()
+    else:
+        print("criterion: NA")
+        criterion = None
+    '''
+    criterion = None
+    criterion = getDiceCrossEntropyLoss()
 
     cuda_avail = torch.cuda.is_available()
     if cuda_avail:
@@ -82,11 +94,13 @@ def train(model_name, optimizer=None, start_epoch=0, criterionType="ce", weighte
         torch.manual_seed(0)
 
     model_name = model_name + "_" + criterionType
+    '''
     if criterionType == "ce":
         if weighted:
             model_name += "_weighted"
         if ignore:
             model_name += "_ignore"
+    '''
 
     log = open("./model/" + model_name + ".log", "w+")
 
@@ -122,6 +136,8 @@ def train(model_name, optimizer=None, start_epoch=0, criterionType="ce", weighte
 
             optimizer.zero_grad()
             segments = model(batch_train_images)
+            ###segments is predictions
+            ####net_output
             loss = criterion(segments, batch_train_labels)
             loss.backward()
             optimizer.step()
