@@ -4,6 +4,7 @@ import numpy as np
 
 
 def getCrossEntropyLoss(train_labels, weighted=False, ignore=False):
+    print("In cross entropy")
     if not weighted:
         if not ignore:
             return nn.CrossEntropyLoss()
