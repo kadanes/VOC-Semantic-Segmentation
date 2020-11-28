@@ -7,4 +7,3 @@ pascal-voc/
 *.icloud
 *.h5
 .history/
-fcn_ce.pt

@@ -20,9 +20,16 @@ def labelVisualize(img):
 
     for i in range(num_class):
         img_out[img == i] = palette[i]
-    return img_out
+    # print(type(img_out[0][0][0]))    
+    return np.int_(img_out)
 
 def visualizePrediction(model, images, labels, heatmap=False):
+
+    import warnings
+    warnings.filterwarnings('ignore')
+    warnings.simplefilter('ignore')
+
+
     try: 
         if (len(images.shape) == 3 and len(labels.shape) == 2):
             images = np.expand_dims(images, axis=0)
@@ -86,11 +93,10 @@ def visualizePrediction(model, images, labels, heatmap=False):
         print(e)
 
 
-def compare_model_performance(name, voc2012):
+def compare_model_performance(name, voc2012, ind = range(0, 5)):
     
     try: 
         print("Name:", name)
-
 
         cuda_avail = torch.cuda.is_available()
         if cuda_avail:
@@ -98,10 +104,7 @@ def compare_model_performance(name, voc2012):
         else:
             torch.manual_seed(0)
         model,_ ,_ = load_model(name)
-        
-    #     for param in model.parameters():
-    #         print(param.data)
-        ind = range(0, 5)
+ 
         visualizePrediction(model, voc2012.train_images[ind], voc2012.train_labels[ind])
         visualizePrediction(model, voc2012.val_images[ind], voc2012.val_labels[ind])
     
