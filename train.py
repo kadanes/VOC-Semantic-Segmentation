@@ -14,6 +14,7 @@ from model.Naive import Naive
 from model.Skip import Skip
 from model.FCN import FCN
 from model.FCN8 import FCN8
+from model.FCN_2 import FCN_2
 
 from voc12 import VOC2012
 
@@ -33,6 +34,8 @@ def train(model_name, optimizer=None, start_epoch=0, criterionType="ce", weighte
         model = FCN()
     elif model_name == "fcn8":
         model = FCN8()
+    elif model_name == "fcn_2":
+        model = FCN_2()
     else:
         raise Exception("Please pass a supported model name: [naive, skip, fcn, fcn8]")
     print("Model Architecture to be Trained: ")
