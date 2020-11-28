@@ -5,7 +5,7 @@ from torch import einsum
 import numpy as np
 
 class GDiceLoss(nn.Module):
-    def __init__(self, apply_nonlin=None, smooth=1e-5):
+    def __init__(self, apply_nonlin=None, smooth=1e-10):
         """
         Generalized Dice;
         Copy from: https://github.com/LIVIAETS/surface-loss/blob/108bd9892adca476e6cdf424124bc6268707498e/losses.py#L29
@@ -16,7 +16,14 @@ class GDiceLoss(nn.Module):
 
         self.apply_nonlin = apply_nonlin
         self.smooth = smooth
+    
+    def dice_coef(y_true, y_pred):
+        y_true_f = K.flatten(y_true)
+        y_pred_f = K.flatten(y_pred)
+        intersection = K.sum(y_true_f * y_pred_f)
+        return (2. * intersection + smooth) / (K.sum(y_true_f) + K.sum(y_pred_f) + smooth)
 
+    def dice_coef_multilabel(y_true, y_pred, numLabels=5):
     def forward(self, net_output, gt):
         shp_x = net_output.shape # (batch size,class_num,x,y,z)
         ###gt = train_labels
@@ -37,20 +44,25 @@ class GDiceLoss(nn.Module):
                     y_onehot = y_onehot.cuda(net_output.device.index)
                 y_onehot.scatter_(1, gt, 1)
 
-
         if self.apply_nonlin is not None:
             net_output = self.apply_nonlin(net_output)
-    
+        
+        # print(net_output.shape, net_output)
+        # print(gt.shape, gt)
         # copy from https://github.com/LIVIAETS/surface-loss/blob/108bd9892adca476e6cdf424124bc6268707498e/losses.py#L29
-        w: torch.Tensor = 1 / (einsum("bcxy->bc", y_onehot).type(torch.float32) + 1e-10)**2
-        intersection: torch.Tensor = w * einsum("bcxy, bcxy->bc", net_output, y_onehot)
-        union: torch.Tensor = w * (einsum("bcxy->bc", net_output) + einsum("bcxy->bc", y_onehot))
-        divided: torch.Tensor =  - 2 * (einsum("bc->b", intersection) + self.smooth) / (einsum("bc->b", union) + self.smooth)
-        gdc = divided.mean()
+        # w: torch.Tensor = 1 / ((einsum("bcxy->bc", y_onehot).type(torch.float32) + 1e-10)**2)
+        # intersection: torch.Tensor = w * einsum("bcxy, bcxy->bc", net_output, y_onehot)
+        # union: torch.Tensor = w * (einsum("bcxy->bc", net_output) + einsum("bcxy->bc", y_onehot))
+        # divided: torch.Tensor = 1 - 2 * (einsum("bc->b", intersection) + self.smooth) / (einsum("bc->b", union) + self.smooth)
+        # gdc = divided.mean()
 
         #print(gdc)
+        numLabels = shp_x[1]
+        dice=numLabels
+        for index in range(numLabels):
+            dice -= dice_coef(y_onehot[:,index,:,:], net_output[:,index,:,:])
+        return dice
 
-        return gdc
 
 def flatten(tensor):
     """Flattens a given tensor such that the channel axis is first.

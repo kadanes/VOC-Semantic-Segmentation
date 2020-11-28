@@ -136,7 +136,7 @@ def train(model_name, optimizer=None, start_epoch=0, criterionType="ce", weighte
             ###segments is predictions
             ####net_output
             loss = criterion(segments, batch_train_labels)
-            #print(loss)
+            # print(loss)
             loss.backward()
             optimizer.step()
 
