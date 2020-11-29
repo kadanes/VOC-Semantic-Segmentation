@@ -10,6 +10,7 @@ import torch.nn.functional as F
 import torch.optim as optim
 from criterion.CrossEntropy import getCrossEntropyLoss
 from criterion.DiceCrossEntropy import getDiceCrossEntropyLoss
+from criterion.DiceCrossEntropy import getFocalLoss
 
 from model.Naive import Naive
 from model.Skip import Skip
@@ -79,6 +80,9 @@ def train(model_name, optimizer=None, start_epoch=0, criterionType="ce", weighte
     elif criterionType == "dice":
         print("criterion: dice")
         criterion = getDiceCrossEntropyLoss()
+    elif criterionType == "focal":
+        print("criterion: focal")
+        criterion = getFocalLoss()
     else:
         print("criterion: NA")
         criterion = None

@@ -3,128 +3,52 @@ from torch import nn
 from torch.autograd import Variable
 from torch import einsum
 import numpy as np
+import torch.nn.functional as F
 
-class GDiceLoss(nn.Module):
-    def __init__(self, apply_nonlin=None, smooth=1e-10):
-        """
-        Generalized Dice;
-        Copy from: https://github.com/LIVIAETS/surface-loss/blob/108bd9892adca476e6cdf424124bc6268707498e/losses.py#L29
-        paper: https://arxiv.org/pdf/1707.03237.pdf
-        tf code: https://github.com/NifTK/NiftyNet/blob/dev/niftynet/layer/loss_segmentation.py#L279
-        """
-        super(GDiceLoss, self).__init__()
+def make_one_hot(labels, classes):
+    one_hot = torch.FloatTensor(labels.size()[0], classes, labels.size()[2], labels.size()[3]).zero_().to(labels.device)
+    target = one_hot.scatter_(1, labels.data, 1)
+    return target
 
-        self.apply_nonlin = apply_nonlin
-        self.smooth = smooth
-    
-    def dice_coef(y_true, y_pred):
-        y_true_f = K.flatten(y_true)
-        y_pred_f = K.flatten(y_pred)
-        intersection = K.sum(y_true_f * y_pred_f)
-        return (2. * intersection + smooth) / (K.sum(y_true_f) + K.sum(y_pred_f) + smooth)
-
-    def dice_coef_multilabel(y_true, y_pred, numLabels=5):
-    def forward(self, net_output, gt):
-        shp_x = net_output.shape # (batch size,class_num,x,y,z)
-        ###gt = train_labels
-        ###net_output = 
-        shp_y = gt.shape # (batch size,1,x,y,z)
-        # one hot code for gt
-        with torch.no_grad():
-            if len(shp_x) != len(shp_y):
-                gt = gt.view((shp_y[0], 1, *shp_y[1:]))
-
-            if all([i == j for i, j in zip(net_output.shape, gt.shape)]):
-                # if this is the case then gt is probably already a one hot encoding
-                y_onehot = gt
-            else:
-                gt = gt.long()
-                y_onehot = torch.zeros(shp_x)
-                if net_output.device.type == "cuda":
-                    y_onehot = y_onehot.cuda(net_output.device.index)
-                y_onehot.scatter_(1, gt, 1)
-
-        if self.apply_nonlin is not None:
-            net_output = self.apply_nonlin(net_output)
-        
-        # print(net_output.shape, net_output)
-        # print(gt.shape, gt)
-        # copy from https://github.com/LIVIAETS/surface-loss/blob/108bd9892adca476e6cdf424124bc6268707498e/losses.py#L29
-        # w: torch.Tensor = 1 / ((einsum("bcxy->bc", y_onehot).type(torch.float32) + 1e-10)**2)
-        # intersection: torch.Tensor = w * einsum("bcxy, bcxy->bc", net_output, y_onehot)
-        # union: torch.Tensor = w * (einsum("bcxy->bc", net_output) + einsum("bcxy->bc", y_onehot))
-        # divided: torch.Tensor = 1 - 2 * (einsum("bc->b", intersection) + self.smooth) / (einsum("bc->b", union) + self.smooth)
-        # gdc = divided.mean()
-
-        #print(gdc)
-        numLabels = shp_x[1]
-        dice=numLabels
-        for index in range(numLabels):
-            dice -= dice_coef(y_onehot[:,index,:,:], net_output[:,index,:,:])
-        return dice
-
-
-def flatten(tensor):
-    """Flattens a given tensor such that the channel axis is first.
-    The shapes are transformed as follows:
-       (N, C, D, H, W) -> (C, N * D * H * W)
-    """
-    C = tensor.size(1)
-    # new axis order
-    axis_order = (1, 0) + tuple(range(2, tensor.dim()))
-    # Transpose: (N, C, D, H, W) -> (C, N, D, H, W)
-    transposed = tensor.permute(axis_order).contiguous()
-    # Flatten: (C, N, D, H, W) -> (C, N * D * H * W)
-    return transposed.view(C, -1)
-
-class GDiceLossV2(nn.Module):
-    def __init__(self, apply_nonlin=None, smooth=1e-5):
-        """
-        Generalized Dice;
-        Copy from: https://github.com/wolny/pytorch-3dunet/blob/6e5a24b6438f8c631289c10638a17dea14d42051/unet3d/losses.py#L75
-        paper: https://arxiv.org/pdf/1707.03237.pdf
-        tf code: https://github.com/NifTK/NiftyNet/blob/dev/niftynet/layer/loss_segmentation.py#L279
-        """
-        super(GDiceLossV2, self).__init__()
-
-        self.apply_nonlin = apply_nonlin
+class DiceLoss(nn.Module):
+    def __init__(self, smooth=1., ignore_index=255):
+        super(DiceLoss, self).__init__()
+        self.ignore_index = ignore_index
         self.smooth = smooth
 
-    def forward(self, net_output, gt):
-        shp_x = net_output.shape # (batch size,class_num,x,y,z)
-        shp_y = gt.shape # (batch size,1,x,y,z)
-        # one hot code for gt
-        with torch.no_grad():
-            if len(shp_x) != len(shp_y):
-                gt = gt.view((shp_y[0], 1, *shp_y[1:]))
+    def forward(self, output, target):
+        if self.ignore_index not in range(target.min(), target.max()):
+            if (target == self.ignore_index).sum() > 0:
+                target[target == self.ignore_index] = target.min()
+        target = make_one_hot(target.unsqueeze(dim=1), classes=output.size()[1])
+        output = F.softmax(output, dim=1)
+        output_flat = output.contiguous().view(-1)
+        target_flat = target.contiguous().view(-1)
+        intersection = (output_flat * target_flat).sum()
+        loss = 1- ((2. * intersection + self.smooth) /
+                    (output_flat.sum() + target_flat.sum() + self.smooth))
+        return loss
 
-            if all([i == j for i, j in zip(net_output.shape, gt.shape)]):
-                # if this is the case then gt is probably already a one hot encoding
-                y_onehot = gt
-            else:
-                gt = gt.long()
-                y_onehot = torch.zeros(shp_x)
-                if net_output.device.type == "cuda":
-                    y_onehot = y_onehot.cuda(net_output.device.index)
-                y_onehot.scatter_(1, gt, 1)
+class FocalLoss(nn.Module):
+    def __init__(self, gamma=2, alpha=None, ignore_index=255, size_average=True):
+        super(FocalLoss, self).__init__()
+        self.gamma = gamma
+        self.size_average = size_average
+        self.CE_loss = nn.CrossEntropyLoss(reduce=False, ignore_index=ignore_index, weight=alpha)
 
+    def forward(self, output, target):
+        logpt = self.CE_loss(output, target)
+        pt = torch.exp(-logpt)
+        loss = ((1-pt)**self.gamma) * logpt
+        if self.size_average:
+            return loss.mean()
+        return loss.sum()
 
-        if self.apply_nonlin is not None:
-            net_output = self.apply_nonlin(net_output)
-
-        input = flatten(net_output)
-        target = flatten(y_onehot)
-        target = target.float()
-        target_sum = target.sum(-1)
-        class_weights = Variable(1. / (target_sum * target_sum).clamp(min=self.smooth), requires_grad=False)
-
-        intersect = (input * target).sum(-1) * class_weights
-        intersect = intersect.sum()
-
-        denominator = ((input + target).sum(-1) * class_weights).sum()
-
-        return  - 2. * intersect / denominator.clamp(min=self.smooth)
 
 def getDiceCrossEntropyLoss():
     print('in the getDiceEntropyLoss')
-    return GDiceLoss()
+    return DiceLoss()
+
+def getFocalLoss():
+    print('in the focal loss')
+    return FocalLoss()
