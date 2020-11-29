@@ -47,7 +47,7 @@ class FCN_resnet_bn(nn.Module):
         return self.upconv(up4)
 
 if __name__ == "__main__":
-    fcn = FCN_2()
+    fcn = FCN_resnet_bn()
     x = torch.autograd.Variable(torch.randn(1, 3, 224, 224))   
     print(fcn.forward(x).shape)
 

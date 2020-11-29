@@ -16,6 +16,7 @@ from model.FCN import FCN
 from model.FCN8 import FCN8
 from model.FCN_2 import FCN_2
 from model.FCN_resnet_bn import FCN_resnet_bn
+from model.FCN_resnet_bn_skp import FCN_resnet_bn_skp
 
 from voc12 import VOC2012
 
@@ -39,6 +40,8 @@ def train(model_name, optimizer=None, start_epoch=0, criterionType="ce", weighte
         model = FCN_2()
     elif model_name == "fcn_resnet_bn":
         model = FCN_resnet_bn()
+    elif model_name == "fcn_resnet_bn_skp":
+        model = FCN_resnet_bn_skp()
     else:
         raise Exception("Please pass a supported model name: [naive, skip, fcn, fcn8]")
     print("Model Architecture to be Trained: ")
