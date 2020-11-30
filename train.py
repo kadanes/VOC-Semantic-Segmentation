@@ -83,6 +83,9 @@ def train(model_name, optimizer=None, start_epoch=0, criterionType="ce", weighte
     elif criterionType == "focal":
         print("criterion: focal")
         criterion = getFocalLoss()
+    elif criterionType == "lovasz":
+        print("criterion: LovaszSoftmaxLoss")
+        criterion = getLovaszSoftmaxLoss()
     else:
         print("criterion: NA")
         criterion = None
