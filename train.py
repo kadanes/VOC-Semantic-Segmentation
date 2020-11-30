@@ -24,7 +24,7 @@ from voc12 import VOC2012
 
 import numpy as np
 
-def train(model_name, optimizer=None, start_epoch=0, criterionType="ce", weighted=False, ignore=False, num_epochs=5, batch_size=64, learning_rate=1e-3, weight_decay=1e-5):
+def train(model_name, optimizer=None, start_epoch=0, criterionType="ce", weighted=False, ignore=False, augumented=False, num_epochs=5, batch_size=64, learning_rate=1e-3, weight_decay=1e-5):
 
     model = None 
 
@@ -49,17 +49,27 @@ def train(model_name, optimizer=None, start_epoch=0, criterionType="ce", weighte
     print("~~~~~~~~~~~~~~~")
 
     voc2012 = VOC2012('./pascal-voc/VOC2012/')
-    ptrain = pathlib.Path('./voc2012_train.h5')
     pval = pathlib.Path('./voc2012_val.h5')
     pdata = pathlib.Path('./pascal-voc/VOC2012/')
 
+    if augumented:
+        ptrain = pathlib.Path('./voc2012_train_augumented.h5')
+    else:
+        ptrain = pathlib.Path('./voc2012_train.h5')
+
     if ptrain.is_file() and pval.is_file():
-        voc2012.load_all_data()
+        if augumented:
+            voc2012.load_all_data_with_aug()
+        else:
+            voc2012.load_all_data()
         print("~~~~~~~~~~~~~~~")
 
     else:
         if pdata.is_file():
-            voc2012.read_all_data_and_save()
+            if augumented:
+                voc2012.read_all_data_and_save()
+            else:
+                voc2012.read_all_data_and_save_with_aug()
         else: 
             print("Downloading VOC2012 dataset...")
             print(subprocess.run(['wget', 'https://s3.amazonaws.com/fast-ai-imagelocal/pascal-voc.tgz'], stdout=subprocess.PIPE))
@@ -69,7 +79,10 @@ def train(model_name, optimizer=None, start_epoch=0, criterionType="ce", weighte
             print(subprocess.run(["rm", "-rf", "./pascal-voc/VOC2007"], stdout=subprocess.PIPE))
             print(subprocess.run(["rm", "./pascal-voc.tgz"], stdout=subprocess.PIPE))
             print("Reading dataset in...")
-            voc2012.read_all_data_and_save()
+            if augumented:
+                voc2012.read_all_data_and_save()
+            else:
+                voc2012.read_all_data_and_save_with_aug()
             print("Cleaning up VOC2012 download...")
             print(subprocess.run(["rm", "-rf", "./pascal-voc/"], stdout=subprocess.PIPE))
             print("~~~~~~~~~~~~~~~")
@@ -96,6 +109,8 @@ def train(model_name, optimizer=None, start_epoch=0, criterionType="ce", weighte
             model_name += "_weighted"
         if ignore:
             model_name += "_ignore"
+        if augumented:
+            model_name += "_augumented"
 
     log = open("./model/" + model_name + ".log", "w+")
 
