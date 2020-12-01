@@ -53,6 +53,20 @@ class FocalLoss(nn.Module):
             return loss.mean()
         return loss.sum()
 
+def lovasz_grad(gt_sorted):
+    """
+    Computes gradient of the Lovasz extension w.r.t sorted errors
+    See Alg. 1 in paper
+    """
+    p = len(gt_sorted)
+    gts = gt_sorted.sum()
+    intersection = gts - gt_sorted.float().cumsum(0)
+    union = gts + (1 - gt_sorted).float().cumsum(0)
+    jaccard = 1. - intersection / union
+    if p > 1: # cover 1-pixel case
+        jaccard[1:p] = jaccard[1:p] - jaccard[0:-1]
+    return jaccard
+
 def lovasz_softmax(probas, labels, classes='present', per_image=False, ignore=None):
     """
     Multi-class Lovasz-Softmax loss
