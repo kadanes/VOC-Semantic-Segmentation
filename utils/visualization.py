@@ -114,7 +114,11 @@ def visualizeModels(model_list, images,labels):
         for i in range(image_count):
             plt.subplots(1, len(model_list)+1, figsize=(15, 15))  # specifying the overall grid size
 
-            plt.subplot(1, len(model_list)+1, ind)
+            plt.subplot(1, len(model_list)+2, ind)
+            plt.imshow(images[i])
+            ind += 1
+
+            plt.subplot(1, len(model_list)+2, ind)
             plt.imshow(labelVisualize(labels[i]))
             ind += 1
 
@@ -125,7 +129,7 @@ def visualizeModels(model_list, images,labels):
                 else:
                     pred = preds[j][i].detach().numpy().argmax(0)
                     
-                plt.subplot(1, len(model_list)+1, ind)
+                plt.subplot(1, len(model_list)+2, ind)
                 plt.imshow(labelVisualize(pred))
                 ind += 1
 
