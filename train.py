@@ -67,9 +67,9 @@ def train(model_name, optimizer=None, start_epoch=0, criterionType="ce", weighte
     else:
         if pdata.is_file():
             if augumented:
-                voc2012.read_all_data_and_save()
-            else:
                 voc2012.read_all_data_and_save_with_aug()
+            else:
+                voc2012.read_all_data_and_save()
         else: 
             print("Downloading VOC2012 dataset...")
             print(subprocess.run(['wget', 'https://s3.amazonaws.com/fast-ai-imagelocal/pascal-voc.tgz'], stdout=subprocess.PIPE))
@@ -80,9 +80,9 @@ def train(model_name, optimizer=None, start_epoch=0, criterionType="ce", weighte
             print(subprocess.run(["rm", "./pascal-voc.tgz"], stdout=subprocess.PIPE))
             print("Reading dataset in...")
             if augumented:
-                voc2012.read_all_data_and_save()
-            else:
                 voc2012.read_all_data_and_save_with_aug()
+            else:
+                voc2012.read_all_data_and_save()
             print("Cleaning up VOC2012 download...")
             print(subprocess.run(["rm", "-rf", "./pascal-voc/"], stdout=subprocess.PIPE))
             print("~~~~~~~~~~~~~~~")
