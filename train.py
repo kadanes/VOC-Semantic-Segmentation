@@ -272,9 +272,15 @@ def load_model(name):
     model = None
     if "naive" in name:
         model = Naive()
-    if "skip" in name:
+    elif "skip" in name:
         model = Skip()
-    if "fcn" in name:
+    elif "fcn_2" in name:
+        model = FCN_2()
+    elif "fcn_resnet_bn" in name:
+        model = FCN_resnet_bn()
+    elif "fcn_resnet_bn_skp" in name:
+        model = FCN_resnet_bn_skp()
+    elif "fcn" in name:
         model = FCN()
 
     optimizer = torch.optim.Adam(model.parameters(), lr=1e-3, weight_decay=1e-5)
@@ -305,5 +311,4 @@ def load_model(name):
             model = torch.load("./model/" + name,  map_location=torch.device('cpu')) 
         except FileNotFoundError:
             print("Model does not exist")
-
-    return model, optimizer, start_epoch
+    return model, optimizer, start_epoch  

@@ -104,15 +104,13 @@ def visualizeModels(model_list, images,labels):
             labels = np.expand_dims(labels, axis=0)
 
         image_count = len(images)
-
         preds = []
         for model in model_list:
             preds.append(predict(model, images))
         preds = np.array(preds)
-
         ind = 1
         for i in range(image_count):
-            plt.subplots(1, len(model_list)+1, figsize=(15, 15))  # specifying the overall grid size
+            plt.subplots(1, len(model_list)+2, figsize=(15, 15))  # specifying the overall grid size
 
             plt.subplot(1, len(model_list)+2, ind)
             plt.imshow(images[i])
@@ -123,7 +121,6 @@ def visualizeModels(model_list, images,labels):
             ind += 1
 
             for j,model in enumerate(model_list):
-
                 if torch.cuda.is_available():
                     pred = preds[j][i].cpu().detach().numpy().argmax(0)
                 else:
@@ -134,7 +131,6 @@ def visualizeModels(model_list, images,labels):
                 ind += 1
 
             ind = 1
-
         plt.show()
     except Exception as e:
         print(e)
