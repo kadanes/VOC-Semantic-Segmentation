@@ -20,6 +20,99 @@ def load_h5(path):
 	file = h5py.File(name=path,mode='r')
 	return file['images'],file['labels']
 
+#Custom Augumenation Methods
+def augument_images_labels(img_list,labels_list):
+    aug_img_list = []
+    aug_label_list = []
+
+    for (img,label) in zip(img_list,labels_list):
+
+        aug_img_list.append(img)
+        aug_label_list.append(label)
+
+        if np.random.rand() < 0.5:
+
+            aug_img_list.append(horizontal_flip(img))
+            aug_img_list.append(center_crop(img))
+            # aug_img_list.append(scale_augmentation(img))
+
+            aug_label_list.append(horizontal_flip(label))
+            aug_label_list.append(center_crop(label))
+            # aug_label_list.append(scale_augmentation(label))
+
+    return (np.array(aug_img_list),np.array(aug_label_list))
+
+def center_crop(image):
+
+    if len(image.shape)==3:
+        h, w, _ = image.shape
+        crop_size = [h*3//4,w*3//4]
+        top = (h - crop_size[0]) // 2
+        left = (w - crop_size[1]) // 2
+        bottom = top + crop_size[0]
+        right = left + crop_size[1]
+        image = image[top:bottom, left:right, :]
+
+        #Resize Image
+        image = cv2.resize(image,(w,h))
+    else:
+        h, w = image.shape
+        crop_size = [h*3//4,w*3//4]
+        top = (h - crop_size[0]) // 2
+        left = (w - crop_size[1]) // 2
+        bottom = top + crop_size[0]
+        right = left + crop_size[1]
+        image = image[top:bottom, left:right]
+
+        #Resize Image
+        image = cv2.resize(image,(w,h))
+
+    return image
+
+
+def random_crop(image):
+    return image
+
+    if len(image.shape)==3:
+        h, w, _ = image.shape
+        crop_size = [h*0.8,w*0.8]
+        top = np.random.randint(0, h - crop_size[0])
+        left = np.random.randint(0, w - crop_size[1])
+        bottom = top + crop_size[0]
+        right = left + crop_size[1]
+        image = image[top:bottom, left:right, :]
+        
+        #Resize Image back to original size
+        image = cv2.resize(image,(w,h))
+    else:
+        h, w = image.shape
+        crop_size = [h*0.8,w*0.8]
+        top = np.random.randint(0, h - crop_size[0])
+        left = np.random.randint(0, w - crop_size[1])
+        bottom = top + crop_size[0]
+        right = left + crop_size[1]
+        image = image[top:bottom, left:right]
+
+        #Resize Image back to original size
+        image = cv2.resize(image,(w,h))
+
+    return image
+
+def horizontal_flip(image):
+    
+    if len(image.shape)==3:
+        return image[:, ::-1, :]
+    else:
+        return image[:, ::-1]
+
+def scale_augmentation(image):
+
+    h,w = image.shape[0] , image.shape[1]
+
+    #Scale down to zoom and then scale up
+    image = cv2.resize(image,(0, 0),0,0.5,0.5)
+    image = cv2.resize(image,(w,h))
+    return image
 
 class VOC2012:
     def __init__(self, root_path='./VOC2012/', aug_path='SegmentationClassAug/', image_size=(224, 224),
@@ -274,6 +367,14 @@ class VOC2012:
             path:The path you want to save train data into.It must be xxx.h5
         '''
         save_h5(path, self.val_images, self.val_labels)
+    def save_train_data_with_aug(self, path='./voc2012_train_augumented.h5'):
+        '''
+        save training images and labels into path in the form of .h5
+        Args:
+            path:The path you want to save train data into.It must be xxx.h5
+        '''
+        self.train_images , self.train_labels = augument_images_labels(self.train_images,self.train_labels)
+        save_h5(path, self.train_images, self.train_labels)
     def read_all_data_and_save(self, train_data_save_path='./voc2012_train.h5', val_data_save_path='./voc2012_val.h5'):
         '''
         Read training and validation data and save them into two .h5 files.
@@ -287,6 +388,35 @@ class VOC2012:
         self.read_val_labels()
         self.save_train_data(train_data_save_path)
         self.save_val_data(val_data_save_path)
+    def read_all_data_and_save_with_aug(self, train_data_save_path='./voc2012_train_augumented.h5', val_data_save_path='./voc2012_val.h5'):
+        '''
+        Read training and validation data and save them into two .h5 files.
+        Args:
+            train_data_save_path:The path you want to save training data into.
+            val_data_save_path:The path you want to save validation data into.
+        '''
+        self.read_train_images()
+        self.read_train_labels()
+        self.read_val_images()
+        self.read_val_labels()
+        self.save_train_data_with_aug(train_data_save_path)
+        self.save_val_data(val_data_save_path)
+    def load_all_data_with_aug(self, train_data_load_path='./voc2012_train_augumented.h5', val_data_load_path='./voc2012_val.h5'):
+        '''
+        Load training and validation data from .h5 files
+        Args:
+            train_data_load_path:The training data .h5 file path.
+            val_data_load_path:The validation data .h5 file path.
+        '''
+        self.load_train_data(train_data_load_path)
+        self.load_val_data(val_data_load_path)
+    def load_train_data_with_aug(self, path='./voc2012_train_augumented.h5'):
+        '''
+        Load training data from .h5 files
+        Args:
+            train_data_load_path:The training data .h5 file path.
+        '''
+        self.train_images, self.train_labels = load_h5(path)
     def load_all_data(self, train_data_load_path='./voc2012_train.h5', val_data_load_path='./voc2012_val.h5'):
         '''
         Load training and validation data from .h5 files

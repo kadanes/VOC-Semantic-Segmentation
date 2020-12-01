@@ -20,9 +20,16 @@ def labelVisualize(img):
 
     for i in range(num_class):
         img_out[img == i] = palette[i]
-    return img_out
+    # print(type(img_out[0][0][0]))    
+    return np.int_(img_out)
 
 def visualizePrediction(model, images, labels, heatmap=False):
+
+    import warnings
+    warnings.filterwarnings('ignore')
+    warnings.simplefilter('ignore')
+
+
     try: 
         if (len(images.shape) == 3 and len(labels.shape) == 2):
             images = np.expand_dims(images, axis=0)
@@ -85,12 +92,58 @@ def visualizePrediction(model, images, labels, heatmap=False):
     except Exception as e:
         print(e)
 
+def visualizeModels(model_list, images,labels):
 
-def compare_model_performance(name, voc2012):
+    import warnings
+    warnings.filterwarnings('ignore')
+    warnings.simplefilter('ignore')
+
+    try: 
+        if (len(images.shape) == 3 and len(labels.shape) == 2):
+            images = np.expand_dims(images, axis=0)
+            labels = np.expand_dims(labels, axis=0)
+
+        image_count = len(images)
+
+        preds = []
+        for model in model_list:
+            preds.append(predict(model, images))
+        preds = np.array(preds)
+
+        ind = 1
+        for i in range(image_count):
+            plt.subplots(1, len(model_list)+1, figsize=(15, 15))  # specifying the overall grid size
+
+            plt.subplot(1, len(model_list)+2, ind)
+            plt.imshow(images[i])
+            ind += 1
+
+            plt.subplot(1, len(model_list)+2, ind)
+            plt.imshow(labelVisualize(labels[i]))
+            ind += 1
+
+            for j,model in enumerate(model_list):
+
+                if torch.cuda.is_available():
+                    pred = preds[j][i].cpu().detach().numpy().argmax(0)
+                else:
+                    pred = preds[j][i].detach().numpy().argmax(0)
+                    
+                plt.subplot(1, len(model_list)+2, ind)
+                plt.imshow(labelVisualize(pred))
+                ind += 1
+
+            ind = 1
+
+        plt.show()
+    except Exception as e:
+        print(e)
+
+
+def compare_model_performance(name, voc2012, ind = range(0, 5)):
     
     try: 
         print("Name:", name)
-
 
         cuda_avail = torch.cuda.is_available()
         if cuda_avail:
@@ -98,10 +151,7 @@ def compare_model_performance(name, voc2012):
         else:
             torch.manual_seed(0)
         model,_ ,_ = load_model(name)
-        
-    #     for param in model.parameters():
-    #         print(param.data)
-        ind = range(0, 5)
+ 
         visualizePrediction(model, voc2012.train_images[ind], voc2012.train_labels[ind])
         visualizePrediction(model, voc2012.val_images[ind], voc2012.val_labels[ind])
     
