@@ -16,7 +16,7 @@ class DiceLoss(nn.Module):
         self.ignore_index = ignore_index
         self.smooth = smooth
 
-    def forward(self, true, logits, eps=1e-7):
+    def forward(self, logits, true, eps=1e-7):
         num_classes = logits.shape[1]
         if num_classes == 1:
             true_1_hot = torch.eye(num_classes + 1)[true.squeeze(1)]
@@ -69,7 +69,7 @@ def lovasz_softmax(probas, labels, classes='present', per_image=False, ignore=No
     else:
         loss = lovasz_softmax_flat(*flatten_probas(probas, labels, ignore), classes=classes)
     return loss
-    
+
 def lovasz_softmax_flat(probas, labels, classes='present'):
     """
     Multi-class Lovasz-Softmax loss

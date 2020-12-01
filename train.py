@@ -11,6 +11,7 @@ import torch.optim as optim
 from criterion.CrossEntropy import getCrossEntropyLoss
 from criterion.DiceCrossEntropy import getDiceCrossEntropyLoss
 from criterion.DiceCrossEntropy import getFocalLoss
+from criterion.DiceCrossEntropy import getLovaszSoftmaxLoss
 
 from model.Naive import Naive
 from model.Skip import Skip
