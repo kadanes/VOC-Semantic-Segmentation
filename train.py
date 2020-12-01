@@ -9,6 +9,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 from criterion.CrossEntropy import getCrossEntropyLoss
+
 from criterion.DiceCrossEntropy import getDiceCrossEntropyLoss
 from criterion.DiceCrossEntropy import getFocalLoss
 from criterion.DiceCrossEntropy import getLovaszSoftmaxLoss
@@ -17,6 +18,9 @@ from model.Naive import Naive
 from model.Skip import Skip
 from model.FCN import FCN
 from model.FCN8 import FCN8
+from model.FCN_2 import FCN_2
+from model.FCN_resnet_bn import FCN_resnet_bn
+from model.FCN_resnet_bn_skp import FCN_resnet_bn_skp
 
 from voc12 import VOC2012
 
@@ -24,7 +28,7 @@ from voc12 import VOC2012
 
 import numpy as np
 
-def train(model_name, optimizer=None, start_epoch=0, criterionType="ce", weighted=False, ignore=False, num_epochs=5, batch_size=64, learning_rate=1e-3, weight_decay=1e-5):
+def train(model_name, optimizer=None, start_epoch=0, criterionType="ce", weighted=False, ignore=False, augumented=False, num_epochs=5, batch_size=64, learning_rate=1e-3, weight_decay=1e-5):
 
     model = None 
 
@@ -36,6 +40,12 @@ def train(model_name, optimizer=None, start_epoch=0, criterionType="ce", weighte
         model = FCN()
     elif model_name == "fcn8":
         model = FCN8()
+    elif model_name == "fcn_2":
+        model = FCN_2()
+    elif model_name == "fcn_resnet_bn":
+        model = FCN_resnet_bn()
+    elif model_name == "fcn_resnet_bn_skp":
+        model = FCN_resnet_bn_skp()
     else:
         raise Exception("Please pass a supported model name: [naive, skip, fcn, fcn8]")
     print("Model Architecture to be Trained: ")
@@ -43,17 +53,27 @@ def train(model_name, optimizer=None, start_epoch=0, criterionType="ce", weighte
     print("~~~~~~~~~~~~~~~")
 
     voc2012 = VOC2012('./pascal-voc/VOC2012/')
-    ptrain = pathlib.Path('./voc2012_train.h5')
     pval = pathlib.Path('./voc2012_val.h5')
     pdata = pathlib.Path('./pascal-voc/VOC2012/')
 
+    if augumented:
+        ptrain = pathlib.Path('./voc2012_train_augumented.h5')
+    else:
+        ptrain = pathlib.Path('./voc2012_train.h5')
+
     if ptrain.is_file() and pval.is_file():
-        voc2012.load_all_data()
+        if augumented:
+            voc2012.load_all_data_with_aug()
+        else:
+            voc2012.load_all_data()
         print("~~~~~~~~~~~~~~~")
 
     else:
         if pdata.is_file():
-            voc2012.read_all_data_and_save()
+            if augumented:
+                voc2012.read_all_data_and_save_with_aug()
+            else:
+                voc2012.read_all_data_and_save()
         else: 
             print("Downloading VOC2012 dataset...")
             print(subprocess.run(['wget', 'https://s3.amazonaws.com/fast-ai-imagelocal/pascal-voc.tgz'], stdout=subprocess.PIPE))
@@ -63,7 +83,10 @@ def train(model_name, optimizer=None, start_epoch=0, criterionType="ce", weighte
             print(subprocess.run(["rm", "-rf", "./pascal-voc/VOC2007"], stdout=subprocess.PIPE))
             print(subprocess.run(["rm", "./pascal-voc.tgz"], stdout=subprocess.PIPE))
             print("Reading dataset in...")
-            voc2012.read_all_data_and_save()
+            if augumented:
+                voc2012.read_all_data_and_save_with_aug()
+            else:
+                voc2012.read_all_data_and_save()
             print("Cleaning up VOC2012 download...")
             print(subprocess.run(["rm", "-rf", "./pascal-voc/"], stdout=subprocess.PIPE))
             print("~~~~~~~~~~~~~~~")
@@ -73,6 +96,7 @@ def train(model_name, optimizer=None, start_epoch=0, criterionType="ce", weighte
 
     if optimizer is None:
         optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
+
     print("here")
     print(criterionType)
     
@@ -90,7 +114,7 @@ def train(model_name, optimizer=None, start_epoch=0, criterionType="ce", weighte
     else:
         print("criterion: NA")
         criterion = None
-
+        
     cuda_avail = torch.cuda.is_available()
     if cuda_avail:
         torch.cuda.manual_seed(0)
@@ -99,13 +123,13 @@ def train(model_name, optimizer=None, start_epoch=0, criterionType="ce", weighte
         torch.manual_seed(0)
 
     model_name = model_name + "_" + criterionType
-    
     if criterionType == "ce":
         if weighted:
             model_name += "_weighted"
         if ignore:
             model_name += "_ignore"
-    
+        if augumented:
+            model_name += "_augumented"
 
     log = open("./model/" + model_name + ".log", "w+")
 
@@ -141,10 +165,7 @@ def train(model_name, optimizer=None, start_epoch=0, criterionType="ce", weighte
 
             optimizer.zero_grad()
             segments = model(batch_train_images)
-            ###segments is predictions
-            ####net_output
             loss = criterion(segments, batch_train_labels)
-            # print(loss)
             loss.backward()
             optimizer.step()
 
