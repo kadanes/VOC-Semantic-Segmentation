@@ -46,11 +46,11 @@ We have taken help of [REFunction/VOC2012-Segmentation](https://github.com/REFun
 # Training Performance 
 
 
-![](https://github.com/parthv21/VOC-Semantic-Segmentation/blob/master/utils/model_comparision_%5Btrain%5D.png)
+![](https://github.com/parthv21/VOC-Semantic-Segmentation/blob/master/model_comparision_train.png)
 
 # Valadation Performance 
 
-![](https://github.com/parthv21/VOC-Semantic-Segmentation/blob/master/utils/model_comparision_%5Bval%5D.png)
+![](https://github.com/parthv21/VOC-Semantic-Segmentation/blob/master/model_comparision_val.png)
 
-> Model List:  `"/checkpoint/fcn_resnet_bn_skp_ce_augumented_e90.pt", "/checkpoint/fcn_resnet_bn_skp_ce_e90.pt", "/checkpoint/fcn_resnet_bn_ce_e90.pt", "/fcn_2_ce.pt", "/fcn8_ce.pt", "/fcn_ce.pt", "/skip_ce.pt", "/naive_ce.pt"`
+> Model List:  `"/checkpoint/fcn_resnet_bn_skp_ce_augumented_e90.pt", "/checkpoint/fcn_resnet_bn_skp_ce_e90.pt", "/checkpoint/fcn_resnet_bn_ce_e120.pt", "/fcn_2_ce.pt", "/fcn8_ce.pt", "/fcn_ce.pt", "/skip_ce.pt", "/naive_ce.pt"`
 
