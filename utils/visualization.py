@@ -2,6 +2,8 @@ import time
 
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib import gridspec
+
 import torch
 
 from train import predict, load_model
@@ -89,14 +91,14 @@ def visualizePrediction(model, images, labels, heatmap=False):
             else:
                 plt.imshow(labelVisualize(pred))
             ind = 1
-        
-        plt.savefig("model_comparision_[" + str(time.time()) + "].png")
+
         plt.show()
     except Exception as e:
         print(e)
 
 def visualizeModels(model_list, images,labels):
-
+    # https://stackoverflow.com/questions/41071947/how-to-remove-the-space-between-subplots-in-matplotlib-pyplot
+    
     import warnings
     warnings.filterwarnings('ignore')
     warnings.simplefilter('ignore')
@@ -108,20 +110,37 @@ def visualizeModels(model_list, images,labels):
 
         image_count = len(images)
         preds = []
+
+        nrow = image_count
+        ncol = len(model_list) + 2
+        gs = gridspec.GridSpec(nrow, ncol, wspace=0.0, hspace=0.0,  top=1.-0.5/(nrow+1), bottom=0.5/(nrow+1), left=0.5/(ncol+1), right=1-0.5/(ncol+1)) 
+
+        fig, ax = plt.subplots(figsize=(ncol+1, nrow))  # specifying the overall grid size
+
         for model in model_list:
             preds.append(predict(model, images))
         preds = np.array(preds)
         ind = 1
+
         for i in range(image_count):
-            plt.subplots(1, len(model_list)+2, figsize=(15, 15))  # specifying the overall grid size
 
-            plt.subplot(1, len(model_list)+2, ind)
-            plt.imshow(images[i])
-            ind += 1
+            # plt.subplot(image_count, len(model_list)+2, ind)
+            # plt.imshow(images[i])
+            # ind += 1
 
-            plt.subplot(1, len(model_list)+2, ind)
-            plt.imshow(labelVisualize(labels[i]))
-            ind += 1
+            ax = plt.subplot(gs[i,0])
+            ax.imshow(images[i])
+            ax.set_xticklabels([])
+            ax.set_yticklabels([])
+
+            # plt.subplot(image_count, len(model_list)+2, ind)
+            # plt.imshow(labelVisualize(labels[i]))
+            # ind += 1
+
+            ax = plt.subplot(gs[i,1])
+            ax.imshow(labelVisualize(labels[i]))
+            ax.set_xticklabels([])
+            ax.set_yticklabels([])
 
             for j,model in enumerate(model_list):
                 if torch.cuda.is_available():
@@ -129,11 +148,17 @@ def visualizeModels(model_list, images,labels):
                 else:
                     pred = preds[j][i].detach().numpy().argmax(0)
                     
-                plt.subplot(1, len(model_list)+2, ind)
-                plt.imshow(labelVisualize(pred))
-                ind += 1
+                # plt.subplot(image_count, len(model_list)+2, ind)
+                # plt.imshow(labelVisualize(pred))
+                # ind += 1
+                ax = plt.subplot(gs[i,j+2])
+                ax.imshow(labelVisualize(pred))
+                ax.set_xticklabels([])
+                ax.set_yticklabels([])
 
-            ind = 1
+            # ind = 1
+        # fig.subplots_adjust(wspace=0, hspace=0)
+        fig.savefig("model_comparision_[" + str(time.time()) + "].png")
         plt.show()
     except Exception as e:
         print(e)
@@ -156,6 +181,3 @@ def compare_model_performance(name, voc2012, ind = range(0, 5)):
     
     except Exception as e:
         print(e)
-
-
-
