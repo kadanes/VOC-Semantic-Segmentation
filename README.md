@@ -21,7 +21,7 @@ def train(model_name, optimizer=None, start_epoch=0, criterionType="ce", weighte
 
 - `start_epoch`: Currently unused
 
-- `criterionType`: The loss function to use. The supported options are: `['ce']`
+- `criterionType`: The loss function to use. The supported options are: `['ce', 'dice', 'focal', 'lovasz']`
 
 - `weighted`: For cross entropy loss if weights of `1 - label_frequency` should be used 
 
@@ -54,3 +54,6 @@ We have taken help of [REFunction/VOC2012-Segmentation](https://github.com/REFun
 
 > Model List:  `"/checkpoint/fcn_resnet_bn_skp_ce_augumented_e90.pt", "/checkpoint/fcn_resnet_bn_skp_ce_e90.pt", "/checkpoint/fcn_resnet_bn_ce_e120.pt", "/fcn_2_ce.pt", "/fcn8_ce.pt", "/fcn_ce.pt", "/skip_ce.pt", "/naive_ce.pt"`
 
+# Accuracy acrosss models and loss functions
+
+![](https://github.com/parthv21/VOC-Semantic-Segmentation/blob/master/accuracy.png)
