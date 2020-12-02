@@ -41,3 +41,16 @@ def train(model_name, optimizer=None, start_epoch=0, criterionType="ce", weighte
 If you don't have the training data downloaded, then the train function will first download the data, unzip it, convert the data to h5 file for validation and train (with augmentation for train if true) and then delete the downloaded zip file. You will need about 10 GB of free space for this inital load. Afterwards the train method will directly load the h5 files that take significantly lesser space. 
 
 We have taken help of [REFunction/VOC2012-Segmentation](https://github.com/REFunction/VOC2012-Segmentation) for the data loader code and modified it to support augmentation. 
+
+
+# Training Performance 
+
+
+![](https://github.com/parthv21/VOC-Semantic-Segmentation/blob/master/utils/model_comparision_%5Btrain%5D.png)
+
+# Valadation Performance 
+
+![](https://github.com/parthv21/VOC-Semantic-Segmentation/blob/master/utils/model_comparision_%5Bval%5D.png)
+
+> Model List:  `"/checkpoint/fcn_resnet_bn_skp_ce_augumented_e90.pt", "/checkpoint/fcn_resnet_bn_skp_ce_e90.pt", "/checkpoint/fcn_resnet_bn_ce_e90.pt", "/fcn_2_ce.pt", "/fcn8_ce.pt", "/fcn_ce.pt", "/skip_ce.pt", "/naive_ce.pt"`
+
