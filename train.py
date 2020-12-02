@@ -10,6 +10,10 @@ import torch.nn.functional as F
 import torch.optim as optim
 from criterion.CrossEntropy import getCrossEntropyLoss
 
+from criterion.DiceCrossEntropy import getDiceCrossEntropyLoss
+from criterion.DiceCrossEntropy import getFocalLoss
+from criterion.DiceCrossEntropy import getLovaszSoftmaxLoss
+
 from model.Naive import Naive
 from model.Skip import Skip
 from model.FCN import FCN
@@ -93,9 +97,24 @@ def train(model_name, optimizer=None, start_epoch=0, criterionType="ce", weighte
     if optimizer is None:
         optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
 
+    print("here")
+    print(criterionType)
+    
     if criterionType == "ce":
         criterion = getCrossEntropyLoss(train_labels, weighted, ignore)
-
+    elif criterionType == "dice":
+        print("criterion: dice")
+        criterion = getDiceCrossEntropyLoss()
+    elif criterionType == "focal":
+        print("criterion: focal")
+        criterion = getFocalLoss()
+    elif criterionType == "lovasz":
+        print("criterion: LovaszSoftmaxLoss")
+        criterion = getLovaszSoftmaxLoss()
+    else:
+        print("criterion: NA")
+        criterion = None
+        
     cuda_avail = torch.cuda.is_available()
     if cuda_avail:
         torch.cuda.manual_seed(0)
