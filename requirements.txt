@@ -3,3 +3,6 @@ numpy
 Pillow
 h5py
 boto
+pytorch
+torchvision
+matplotlib

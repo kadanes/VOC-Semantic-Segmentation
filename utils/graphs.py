@@ -9,15 +9,18 @@ def plot_accuracy():
     ax=fig.add_subplot(111)
     
     x = range(0,8)
+    
+    models = ['Naive','Skip','VGG \nFCN','VGG \nFCN 8','VGG \nFCN BN','Resnet \nDecoder','Resnet \nFCN8', "Resnet \nFCN8 (Aug)"]
+
     acc_ce = [68, 71, 80, 80, 81, 80, 83, 84]
-    acc_dice = [55, 55, 55, 55, 55, 55, 55, 55]
-    acc_focal  = [57, 57, 57, 57, 57, 57, 57, 57]
-    acc_sm = [58, 58, 58, 58, 58, 58, 58, 58]
+    acc_dice = [54, 68, 61, 63, 67, 80, 81, 83]
+    acc_focal  = [67, 73, 73, 68, 75, 82, 83, 84]
+    acc_sm = [54, 55, 57, 53, 61, 61, 63, ]
 
     ax.plot(x,acc_ce,c='b',marker="^",ls="-", label='CrossEntropy',fillstyle='none')
     ax.plot(x,acc_focal,c='g',marker=(8,2,0),ls="-", label='Focal')
     ax.plot(x,acc_dice,c='k', marker="X", ls='-',label='Dice')
-    ax.plot(x,acc_sm,c='r',marker="v",ls='-',label='Las softmax')
+    ax.plot(x,acc_sm,c='r',marker="v",ls='-',label='Lovasz Softmax')
 
 
     models = ['Naive','Skip','VGG \nFCN','VGG \nFCN 8','VGG \nFCN BN','Resnet \nDecoder','Resnet \nFCN8', "Resnet \nFCN8 (Aug)"]

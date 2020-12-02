@@ -47,7 +47,7 @@ def train(model_name, optimizer=None, start_epoch=0, criterionType="ce", weighte
     elif model_name == "fcn_resnet_bn_skp":
         model = FCN_resnet_bn_skp()
     else:
-        raise Exception("Please pass a supported model name: [naive, skip, fcn, fcn8]")
+        raise Exception("Please pass a supported model name: [naive, skip, fcn, fcn8, fcn_2, fcn_resnet_bn, fcn_resnet_bn_skp]")
     print("Model Architecture to be Trained: ")
     print(model)
     print("~~~~~~~~~~~~~~~")
@@ -128,8 +128,9 @@ def train(model_name, optimizer=None, start_epoch=0, criterionType="ce", weighte
             model_name += "_weighted"
         if ignore:
             model_name += "_ignore"
-        if augumented:
-            model_name += "_augumented"
+            
+    if augumented:
+        model_name += "_augumented"
 
     log = open("./model/" + model_name + ".log", "w+")
 
