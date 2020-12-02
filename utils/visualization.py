@@ -1,3 +1,5 @@
+import time
+
 import numpy as np
 import matplotlib.pyplot as plt
 import torch
@@ -87,7 +89,8 @@ def visualizePrediction(model, images, labels, heatmap=False):
             else:
                 plt.imshow(labelVisualize(pred))
             ind = 1
-
+        
+        plt.savefig("model_comparision_[" + str(time.time()) + "].png")
         plt.show()
     except Exception as e:
         print(e)
