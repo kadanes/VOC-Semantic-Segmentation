@@ -23,7 +23,7 @@ def plot_accuracy():
     ax.plot(x,acc_sm,c='r',marker="v",ls='-',label='Lovasz Softmax')
 
 
-    models = ['Naive','Skip','VGG \n 16_S1','VGG \n 16_S2','VGG \n 16_S1_bn','ResNet \n 18_bn','ResNet \n 18_S2', "ResNet \n 18_S2"]
+    models = ['Naive','Skip','VGG \n 16_S1','VGG \n 16_S2','VGG \n 16_S1_bn','ResNet \n 18_bn','ResNet \n 18_S2', "ResNet \n 18_S2 Aug"]
     ax.set_xticks(range(0,8))
     ax.set_xticklabels(models)
 
