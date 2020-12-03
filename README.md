@@ -4,7 +4,7 @@ In this project we experiment with different models for the task of semantic seg
 
 To see our different models please go to the `models` directory. In it there are all the models that we have trained along with the logs. This directory also has the model code.
 
-If you want to train the models, then please look at the `train_parth.ipynb`. 
+If you want to train the models, then please look at the `train.ipynb`. 
 
 If you want to look at our visualizations , then please see the `results.ipynb` notebook.
 
@@ -48,12 +48,12 @@ We have taken help of [REFunction/VOC2012-Segmentation](https://github.com/REFun
 
 ![](https://github.com/parthv21/VOC-Semantic-Segmentation/blob/master/model_comparision_train.png)
 
-# Valadation Performance 
+# Validation Performance 
 
 ![](https://github.com/parthv21/VOC-Semantic-Segmentation/blob/master/model_comparision_val.png)
 
 > Model List:  `"/checkpoint/fcn_resnet_bn_skp_ce_augumented_e90.pt", "/checkpoint/fcn_resnet_bn_skp_ce_e90.pt", "/checkpoint/fcn_resnet_bn_ce_e120.pt", "/fcn_2_ce.pt", "/fcn8_ce.pt", "/fcn_ce.pt", "/skip_ce.pt", "/naive_ce.pt"`
 
-# Accuracy acrosss models and loss functions
+# Accuracy across models and loss functions
 
 ![](https://github.com/parthv21/VOC-Semantic-Segmentation/blob/master/accuracy.png)
