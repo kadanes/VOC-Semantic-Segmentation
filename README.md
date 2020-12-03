@@ -1,13 +1,12 @@
 # VOC-Semantic-Segmentation
 
-In this project we experiment with different models for the task of semantic segmentaion on the VOC2012 datatset. We try a nive autoencorder architecture and move up from there to use a pretrained backbone. We also experiment with differnt loss functions. 
+In this project, we experimented with different models for the task of semantic segmentaion on the VOC2012 datatset. We tried a naive auto-encorder architecture and moved up from there to use a pretrained backbone. We also experimented those models across different loss functions. 
 
-To see our different models please go to the `models` directory. In it there are all the models that we have trained along with the logs. This directory also has the model code.
+To see our different models please go to the `models` directory. In it, there are all the models that we have trained along with the logs. This directory also has the model code.
 
 If you want to train the models, then please look at the `train.ipynb`. 
 
 If you want to look at our visualizations , then please see the `results.ipynb` notebook.
-
 
 A breif description of the `train` function:
 
@@ -15,7 +14,7 @@ A breif description of the `train` function:
 def train(model_name, optimizer=None, start_epoch=0, criterionType="ce", weighted=False, ignore=False, augumented=False, num_epochs=5, batch_size=64, learning_rate=1e-3, weight_decay=1e-5):
 `
 
-- `mode_name` : Name of the model you want to train. Allowed values are: `["naive", "skip", "fcn", "fcn8", "fcn_2", "fcn_resnet_bn", "fcn_resnet_bn_skp"]`
+- `model_name` : Name of the model you want to train. Allowed values are: `["naive", "skip", "fcn", "fcn8", "fcn_2", "fcn_resnet_bn", "fcn_resnet_bn_skp"]`
 
 - `optimizer`: Currently unused 
 
