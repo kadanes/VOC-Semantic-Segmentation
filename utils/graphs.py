@@ -13,9 +13,9 @@ def plot_accuracy():
     models = ['Naive','Skip','VGG \nFCN','VGG \nFCN 8','VGG \nFCN BN','Resnet \nDecoder','Resnet \nFCN8', "Resnet \nFCN8 (Aug)"]
 
     acc_ce = [68, 71, 80, 80, 81, 80, 83, 84]
-    acc_dice = [54, 68, 61, 63, 67, 80, 81, 83]
+    acc_dice = [54, 68, 72, 73, 67, 80, 81, 83]
     acc_focal  = [67, 73, 73, 68, 75, 82, 83, 84]
-    acc_sm = [54, 55, 57, 53, 61, 61, 63, ]
+    acc_sm = [54, 55, 57, 53, 61, 61, 63, 83]
 
     ax.plot(x,acc_ce,c='b',marker="^",ls="-", label='CrossEntropy',fillstyle='none')
     ax.plot(x,acc_focal,c='g',marker=(8,2,0),ls="-", label='Focal')
